@@ -1,10 +1,14 @@
 #![no_std]
 #![no_main]
 extern crate alloc;
+
+mod sdk;
+
 use alloc::boxed::Box;
-use alloc::string::String;
 use firefly_rust as ff;
 use piccolo::{Closure, Executor, Lua};
+
+use crate::sdk::load_sdk;
 
 #[unsafe(no_mangle)]
 extern "C" fn boot() {
@@ -13,11 +17,9 @@ extern "C" fn boot() {
 
 fn run() -> Result<(), Box<dyn core::error::Error>> {
     let source = r#"
-function foo (msg)
-    return msg
+function boot()
+    firefly.log_debug('hello world!')
 end
-
-bar = 2 + 3
     "#;
 
     let mut lua = Lua::empty();
@@ -27,6 +29,7 @@ bar = 2 + 3
         load_coroutine(ctx);
         load_math(ctx);
         load_string(ctx);
+        load_sdk(ctx);
         // load_table(ctx);
     });
 
@@ -41,13 +44,14 @@ bar = 2 + 3
 
     let ex = lua.try_enter(|ctx| {
         let env = ctx.globals();
-        let foo = env.get::<_, Closure>(ctx, "foo")?;
-        let ex = Executor::start(ctx, foo.into(), "this is my message");
+        // env.set(ctx, key, value)
+        let boot = env.get::<_, Closure>(ctx, "boot")?;
+        let ex = Executor::start(ctx, boot.into(), ());
         Ok(ctx.stash(ex))
     })?;
 
-    let result = lua.execute::<String>(&ex)?;
-    ff::log_debug(&result);
+    lua.execute::<()>(&ex)?;
+    ff::log_debug("boot done");
     Ok(())
 }
 
