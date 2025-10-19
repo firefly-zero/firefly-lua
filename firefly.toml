@@ -1,4 +1,4 @@
-author_id = "gram"
-app_id = "firefly-lua"
-author_name = "Gram"
-app_name = "Firefly Lua"
+author_id = "demo"
+app_id = "lua-triangle"
+author_name = "Demo"
+app_name = "Triangle Demo (Lua)"
