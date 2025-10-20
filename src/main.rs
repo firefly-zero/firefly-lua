@@ -27,12 +27,21 @@ fn get_lua() -> &'static mut Lua {
 
 fn run_boot() -> Result<(), Box<dyn core::error::Error>> {
     let source = r#"
+i = 1
+
 function boot()
     firefly.log_debug('hello from boot!')
 end
 
 function update()
-    firefly.log_debug('hello from update!')
+    i = i + 1
+    if i > 16 then
+      i = 1
+    end
+end
+
+function render()
+    firefly.clear_screen(i)
 end
     "#;
 
@@ -72,17 +81,36 @@ extern "C" fn update() {
 
 fn run_update() -> Result<(), Box<dyn core::error::Error>> {
     let lua = get_lua();
-    let ex = lua.try_enter(|ctx| {
+    let maybe_ex = lua.try_enter(|ctx| {
         let env = ctx.globals();
         let update = env.get::<_, Closure>(ctx, "update")?;
         let ex = Executor::start(ctx, update.into(), ());
         Ok(ctx.stash(ex))
-    })?;
-    lua.execute::<()>(&ex)?;
+    });
+    if let Ok(ex) = maybe_ex {
+        lua.execute::<()>(&ex)?;
+    }
     Ok(())
 }
 
 #[unsafe(no_mangle)]
 extern "C" fn render() {
-    // ...
+    if let Err(err) = run_render() {
+        let err = alloc::format!("{err}");
+        ff::log_error(&err);
+    }
+}
+
+fn run_render() -> Result<(), Box<dyn core::error::Error>> {
+    let lua = get_lua();
+    let maybe_ex = lua.try_enter(|ctx| {
+        let env = ctx.globals();
+        let render = env.get::<_, Closure>(ctx, "render")?;
+        let ex = Executor::start(ctx, render.into(), ());
+        Ok(ctx.stash(ex))
+    });
+    if let Ok(ex) = maybe_ex {
+        lua.execute::<()>(&ex)?;
+    }
+    Ok(())
 }

@@ -32,7 +32,7 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         ctx,
         "clear_screen",
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
-            let color = stack.consume::<u8>(ctx)?;
+            let color = stack.consume::<i64>(ctx)?;
             let Ok(color) = ff::Color::try_from(color as usize) else {
                 return format_error("invalid color");
             };
@@ -51,7 +51,7 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
             let b = rgb.get::<_, u8>(ctx, "b")?;
             let rgb = ff::RGB { r, g, b };
 
-            let color = stack.consume::<u8>(ctx)?;
+            let color = stack.consume::<i64>(ctx)?;
             let Ok(color) = ff::Color::try_from(color as usize) else {
                 return format_error("invalid color");
             };
