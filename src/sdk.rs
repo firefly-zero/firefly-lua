@@ -4,6 +4,24 @@ use piccolo as pc;
 pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
     let module = pc::Table::new(&ctx);
 
+    module.set_field(ctx, "NONE", 0);
+    module.set_field(ctx, "BLACK", 1);
+    module.set_field(ctx, "PURPLE", 2);
+    module.set_field(ctx, "RED", 3);
+    module.set_field(ctx, "ORANGE", 4);
+    module.set_field(ctx, "YELLOW", 5);
+    module.set_field(ctx, "LIGHT_GREEN", 6);
+    module.set_field(ctx, "GREEN", 7);
+    module.set_field(ctx, "DARK_GREEN", 8);
+    module.set_field(ctx, "DARK_BLUE", 9);
+    module.set_field(ctx, "BLUE", 10);
+    module.set_field(ctx, "LIGHT_BLUE", 11);
+    module.set_field(ctx, "CYAN", 12);
+    module.set_field(ctx, "WHITE", 13);
+    module.set_field(ctx, "LIGHT_GRAY", 14);
+    module.set_field(ctx, "GRAY", 15);
+    module.set_field(ctx, "DARK_GRAY", 16);
+
     module.set_field(
         ctx,
         "log_debug",

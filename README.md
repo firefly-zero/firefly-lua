@@ -5,11 +5,11 @@
 Graphics:
 
 ```lua
-firefly.set_color(1, {r=255, g=0, b=0})
+firefly.set_color(firefly.RED, {r=255, g=0, b=0})
 
-firefly.clear_screen(1)
+firefly.clear_screen(firefly.BLUE)
 
-firefly.draw_point({x=10, y=20}, 1)
+firefly.draw_point({x=10, y=20}, firefly.BLACK)
 ```
 
 Misc:

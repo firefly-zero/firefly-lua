@@ -1,4 +1,4 @@
-i = 1
+i = firefly.RED
 
 function boot()
     firefly.log_debug('hello from boot!')
