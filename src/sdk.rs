@@ -6,7 +6,7 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
 
     module.set_field(
         ctx,
-        "log_debug",
+        "logDebug",
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
             let text = stack.consume::<pc::String>(ctx)?;
             let text = text.as_bytes();
@@ -18,7 +18,7 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
 
     module.set_field(
         ctx,
-        "log_error",
+        "logError",
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
             let text = stack.consume::<pc::String>(ctx)?;
             let text = text.as_bytes();
@@ -30,7 +30,7 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
 
     module.set_field(
         ctx,
-        "clear_screen",
+        "clearScreen",
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
             let color = stack.consume::<i64>(ctx)?;
             let Ok(color) = ff::Color::try_from(color as usize) else {
@@ -43,15 +43,15 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
 
     module.set_field(
         ctx,
-        "set_color",
+        "setColor",
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
-            let rgb = stack.consume::<pc::Table>(ctx)?;
+            let rgb = stack.from_back::<pc::Table>(ctx)?;
             let r = rgb.get::<_, u8>(ctx, "r")?;
             let g = rgb.get::<_, u8>(ctx, "g")?;
             let b = rgb.get::<_, u8>(ctx, "b")?;
             let rgb = ff::RGB { r, g, b };
 
-            let color = stack.consume::<i64>(ctx)?;
+            let color = stack.from_back::<i64>(ctx)?;
             let Ok(color) = ff::Color::try_from(color as usize) else {
                 return format_error("invalid color");
             };
