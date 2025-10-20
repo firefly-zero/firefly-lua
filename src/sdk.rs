@@ -98,6 +98,33 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         }),
     );
 
+    module.set_field(
+        ctx,
+        "draw_line",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let style = stack.from_back::<pc::Table>(ctx)?;
+            let color = style.get::<_, i64>(ctx, "color")?;
+            let Ok(color) = ff::Color::try_from(color as usize) else {
+                return format_error("invalid color");
+            };
+            let width = style.get::<_, i32>(ctx, "width")?;
+            let style = ff::LineStyle::new(color, width);
+
+            let point_b = stack.from_back::<pc::Table>(ctx)?;
+            let x = point_b.get::<_, i32>(ctx, "x")?;
+            let y = point_b.get::<_, i32>(ctx, "y")?;
+            let point_b = ff::Point { x, y };
+
+            let point_a = stack.from_back::<pc::Table>(ctx)?;
+            let x = point_a.get::<_, i32>(ctx, "x")?;
+            let y = point_a.get::<_, i32>(ctx, "y")?;
+            let point_a = ff::Point { x, y };
+
+            ff::draw_line(point_a, point_b, style);
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
     ctx.set_global("firefly", module);
 }
 
