@@ -41,6 +41,26 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         }),
     );
 
+    module.set_field(
+        ctx,
+        "set_color",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let rgb = stack.consume::<pc::Table>(ctx)?;
+            let r = rgb.get::<_, u8>(ctx, "r")?;
+            let g = rgb.get::<_, u8>(ctx, "g")?;
+            let b = rgb.get::<_, u8>(ctx, "b")?;
+            let rgb = ff::RGB { r, g, b };
+
+            let color = stack.consume::<u8>(ctx)?;
+            let Ok(color) = ff::Color::try_from(color as usize) else {
+                return format_error("invalid color");
+            };
+
+            ff::set_color(color, rgb);
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
     ctx.set_global("firefly", module);
 }
 
