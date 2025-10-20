@@ -41,13 +41,15 @@ fn run_boot() -> Result<(), anyhow::Error> {
     })?;
     lua.execute::<()>(&ex)?;
 
-    let ex = lua.try_enter(|ctx| {
+    let maybe_ex = lua.try_enter(|ctx| {
         let env = ctx.globals();
         let boot = env.get::<_, Closure>(ctx, "boot")?;
         let ex = Executor::start(ctx, boot.into(), ());
         Ok(ctx.stash(ex))
-    })?;
-    lua.execute::<()>(&ex)?;
+    });
+    if let Ok(ex) = maybe_ex {
+        lua.execute::<()>(&ex)?;
+    }
 
     #[allow(static_mut_refs)]
     unsafe { LUA.set(lua) }.ok().unwrap();
