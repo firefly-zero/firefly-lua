@@ -61,6 +61,25 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         }),
     );
 
+    module.set_field(
+        ctx,
+        "draw_point",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let color = stack.from_back::<i64>(ctx)?;
+            let Ok(color) = ff::Color::try_from(color as usize) else {
+                return format_error("invalid color");
+            };
+
+            let point = stack.from_back::<pc::Table>(ctx)?;
+            let x = point.get::<_, i32>(ctx, "x")?;
+            let y = point.get::<_, i32>(ctx, "y")?;
+            let point = ff::Point { x, y };
+
+            ff::draw_point(point, color);
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
     ctx.set_global("firefly", module);
 }
 
