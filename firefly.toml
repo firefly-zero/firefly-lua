@@ -2,3 +2,6 @@ author_id = "demo"
 app_id = "lua-triangle"
 author_name = "Demo"
 app_name = "Triangle Demo (Lua)"
+
+[files]
+main = { path = "main.lua", copy = true }

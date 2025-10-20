@@ -25,33 +25,17 @@ fn get_lua() -> &'static mut Lua {
     unsafe { LUA.get_mut() }.unwrap()
 }
 
-fn run_boot() -> Result<(), Box<dyn core::error::Error>> {
-    let source = r#"
-i = 1
-
-function boot()
-    firefly.log_debug('hello from boot!')
-end
-
-function update()
-    i = i + 1
-    if i > 16 then
-      i = 1
-    end
-end
-
-function render()
-    firefly.clear_screen(i)
-end
-    "#;
-
+fn run_boot() -> Result<(), anyhow::Error> {
     ff::log_debug("booting...");
+    let Some(source) = ff::load_file_buf("main") else {
+        anyhow::bail!("file `main` not found");
+    };
     let mut lua = Lua::core();
     lua.enter(load_sdk);
 
     let ex = lua.try_enter(|ctx| {
         let env = ctx.globals();
-        let closure = Closure::load_with_env(ctx, None, source.as_bytes(), env)?;
+        let closure = Closure::load_with_env(ctx, None, source.data(), env)?;
         let ex = Executor::start(ctx, closure.into(), ());
         Ok(ctx.stash(ex))
     })?;
