@@ -30,7 +30,7 @@ end
         load_math(ctx);
         load_string(ctx);
         load_sdk(ctx);
-        // load_table(ctx);
+        load_table(ctx);
     });
 
     let ex = lua.try_enter(|ctx| {
