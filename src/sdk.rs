@@ -6,7 +6,7 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
 
     module.set_field(
         ctx,
-        "logDebug",
+        "log_debug",
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
             let text = stack.consume::<pc::String>(ctx)?;
             let text = text.as_bytes();
@@ -18,7 +18,7 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
 
     module.set_field(
         ctx,
-        "logError",
+        "log_error",
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
             let text = stack.consume::<pc::String>(ctx)?;
             let text = text.as_bytes();
@@ -30,7 +30,7 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
 
     module.set_field(
         ctx,
-        "clearScreen",
+        "clear_screen",
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
             let color = stack.consume::<i64>(ctx)?;
             let Ok(color) = ff::Color::try_from(color as usize) else {
@@ -43,7 +43,7 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
 
     module.set_field(
         ctx,
-        "setColor",
+        "set_color",
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
             let rgb = stack.from_back::<pc::Table>(ctx)?;
             let r = rgb.get::<_, u8>(ctx, "r")?;

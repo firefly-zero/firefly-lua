@@ -5,15 +5,15 @@
 Graphics:
 
 ```lua
-firefly.setColor(1, {r=255, g=0, b=0})
+firefly.set_color(1, {r=255, g=0, b=0})
 
-firefly.clearScreen(1)
+firefly.clear_screen(1)
 ```
 
 Misc:
 
 ```lua
-firefly.logDebug("let's go!")
+firefly.log_debug("let's go!")
 
-firefly.logError("oh no...")
+firefly.log_error("oh no...")
 ```

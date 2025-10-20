@@ -1,7 +1,7 @@
 i = 1
 
 function boot()
-    firefly.logDebug('hello from boot!')
+    firefly.log_debug('hello from boot!')
 end
 
 function update()
@@ -12,5 +12,5 @@ function update()
 end
 
 function render()
-    firefly.clearScreen(i)
+    firefly.clear_screen(i)
 end
