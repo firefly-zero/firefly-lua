@@ -1,5 +1,10 @@
 # firefly-lua
 
+Lua SDK for making [Firefly Zero](https://fireflyzero.com/) games.
+
+* [▶️ getting started](https://docs.fireflyzero.com/dev/getting-started/)
+* [🐙 github](https://github.com/firefly-zero/firefly-lua)
+
 ## Examples
 
 Graphics:
@@ -30,6 +35,8 @@ local corner = {width=4, height=4}
 firefly.draw_rounded_rect(point, size, corner, style)
 
 firefly.draw_circle(point, 10, style)
+
+firefly.draw_ellipse(point, size, style)
 ```
 
 Misc:
