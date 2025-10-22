@@ -116,6 +116,18 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         }),
     );
 
+    module.set_field(
+        ctx,
+        "draw_circle",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let style = pop_style(ctx, &mut stack)?;
+            let d = stack.from_back::<i32>(ctx)?;
+            let point = pop_point(ctx, &mut stack)?;
+            ff::draw_circle(point, d, style);
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
     ctx.set_global("firefly", module);
 }
 
