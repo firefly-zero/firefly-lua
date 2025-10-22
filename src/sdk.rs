@@ -60,11 +60,7 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         ctx,
         "set_color",
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
-            let rgb = stack.from_back::<pc::Table>(ctx)?;
-            let r = rgb.get::<_, u8>(ctx, "r")?;
-            let g = rgb.get::<_, u8>(ctx, "g")?;
-            let b = rgb.get::<_, u8>(ctx, "b")?;
-            let rgb = ff::RGB { r, g, b };
+            let rgb = pop_rgb(ctx, &mut stack)?;
 
             let color = pop_color(ctx, &mut stack)?;
             ff::set_color(color, rgb);
@@ -95,7 +91,31 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         }),
     );
 
+    module.set_field(
+        ctx,
+        "draw_rect",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let style = pop_style(ctx, &mut stack)?;
+            let size = pop_size(ctx, &mut stack)?;
+            let point = pop_point(ctx, &mut stack)?;
+            ff::draw_rect(point, size, style);
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
     ctx.set_global("firefly", module);
+}
+
+fn pop_rgb<'gc>(
+    ctx: piccolo::Context<'gc>,
+    stack: &mut piccolo::Stack<'gc, '_>,
+) -> Result<ff::RGB, piccolo::Error<'gc>> {
+    let rgb = stack.from_back::<pc::Table>(ctx)?;
+    let r = rgb.get::<_, u8>(ctx, "r")?;
+    let g = rgb.get::<_, u8>(ctx, "g")?;
+    let b = rgb.get::<_, u8>(ctx, "b")?;
+    let rgb = ff::RGB { r, g, b };
+    Ok(rgb)
 }
 
 fn pop_point<'gc>(
@@ -107,6 +127,17 @@ fn pop_point<'gc>(
     let y = point.get::<_, i32>(ctx, "y")?;
     let point = ff::Point { x, y };
     Ok(point)
+}
+
+fn pop_color<'gc>(
+    ctx: piccolo::Context<'gc>,
+    stack: &mut piccolo::Stack<'gc, '_>,
+) -> Result<ff::Color, piccolo::Error<'gc>> {
+    let color = stack.from_back::<i64>(ctx)?;
+    let Ok(color) = ff::Color::try_from(color as usize) else {
+        return format_error("invalid color");
+    };
+    Ok(color)
 }
 
 fn pop_line_style<'gc>(
@@ -123,15 +154,40 @@ fn pop_line_style<'gc>(
     Ok(style)
 }
 
-fn pop_color<'gc>(
+fn pop_style<'gc>(
     ctx: piccolo::Context<'gc>,
     stack: &mut piccolo::Stack<'gc, '_>,
-) -> Result<ff::Color, piccolo::Error<'gc>> {
-    let color = stack.from_back::<i64>(ctx)?;
-    let Ok(color) = ff::Color::try_from(color as usize) else {
-        return format_error("invalid color");
+) -> Result<ff::Style, piccolo::Error<'gc>> {
+    let style = stack.from_back::<pc::Table>(ctx)?;
+
+    let fill_color = style.get::<_, i64>(ctx, "fill_color")?;
+    let Ok(fill_color) = ff::Color::try_from(fill_color as usize) else {
+        return format_error("invalid fill_color");
     };
-    Ok(color)
+
+    let stroke_color = style.get::<_, i64>(ctx, "stroke_color")?;
+    let Ok(stroke_color) = ff::Color::try_from(stroke_color as usize) else {
+        return format_error("invalid stroke_color");
+    };
+
+    let stroke_width = style.get::<_, i32>(ctx, "stroke_width")?;
+    let style = ff::Style {
+        fill_color,
+        stroke_color,
+        stroke_width,
+    };
+    Ok(style)
+}
+
+fn pop_size<'gc>(
+    ctx: piccolo::Context<'gc>,
+    stack: &mut piccolo::Stack<'gc, '_>,
+) -> Result<ff::Size, piccolo::Error<'gc>> {
+    let style = stack.from_back::<pc::Table>(ctx)?;
+    let width = style.get::<_, i32>(ctx, "width")?;
+    let height = style.get::<_, i32>(ctx, "height")?;
+    let style = ff::Size { width, height };
+    Ok(style)
 }
 
 fn format_error<'gc, T>(err: &'static str) -> Result<T, pc::Error<'gc>> {
