@@ -50,10 +50,7 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         ctx,
         "clear_screen",
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
-            let color = stack.consume::<i64>(ctx)?;
-            let Ok(color) = ff::Color::try_from(color as usize) else {
-                return format_error("invalid color");
-            };
+            let color = pop_color(ctx, &mut stack)?;
             ff::clear_screen(color);
             Ok(pc::CallbackReturn::Return)
         }),
@@ -69,11 +66,7 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
             let b = rgb.get::<_, u8>(ctx, "b")?;
             let rgb = ff::RGB { r, g, b };
 
-            let color = stack.from_back::<i64>(ctx)?;
-            let Ok(color) = ff::Color::try_from(color as usize) else {
-                return format_error("invalid color");
-            };
-
+            let color = pop_color(ctx, &mut stack)?;
             ff::set_color(color, rgb);
             Ok(pc::CallbackReturn::Return)
         }),
@@ -83,16 +76,8 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         ctx,
         "draw_point",
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
-            let color = stack.from_back::<i64>(ctx)?;
-            let Ok(color) = ff::Color::try_from(color as usize) else {
-                return format_error("invalid color");
-            };
-
-            let point = stack.from_back::<pc::Table>(ctx)?;
-            let x = point.get::<_, i32>(ctx, "x")?;
-            let y = point.get::<_, i32>(ctx, "y")?;
-            let point = ff::Point { x, y };
-
+            let color = pop_color(ctx, &mut stack)?;
+            let point = pop_point(ctx, &mut stack)?;
             ff::draw_point(point, color);
             Ok(pc::CallbackReturn::Return)
         }),
@@ -102,30 +87,51 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         ctx,
         "draw_line",
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
-            let style = stack.from_back::<pc::Table>(ctx)?;
-            let color = style.get::<_, i64>(ctx, "color")?;
-            let Ok(color) = ff::Color::try_from(color as usize) else {
-                return format_error("invalid color");
-            };
-            let width = style.get::<_, i32>(ctx, "width")?;
-            let style = ff::LineStyle::new(color, width);
-
-            let point_b = stack.from_back::<pc::Table>(ctx)?;
-            let x = point_b.get::<_, i32>(ctx, "x")?;
-            let y = point_b.get::<_, i32>(ctx, "y")?;
-            let point_b = ff::Point { x, y };
-
-            let point_a = stack.from_back::<pc::Table>(ctx)?;
-            let x = point_a.get::<_, i32>(ctx, "x")?;
-            let y = point_a.get::<_, i32>(ctx, "y")?;
-            let point_a = ff::Point { x, y };
-
+            let style = pop_line_style(ctx, &mut stack)?;
+            let point_b = pop_point(ctx, &mut stack)?;
+            let point_a = pop_point(ctx, &mut stack)?;
             ff::draw_line(point_a, point_b, style);
             Ok(pc::CallbackReturn::Return)
         }),
     );
 
     ctx.set_global("firefly", module);
+}
+
+fn pop_point<'gc>(
+    ctx: piccolo::Context<'gc>,
+    stack: &mut piccolo::Stack<'gc, '_>,
+) -> Result<ff::Point, piccolo::Error<'gc>> {
+    let point = stack.from_back::<pc::Table>(ctx)?;
+    let x = point.get::<_, i32>(ctx, "x")?;
+    let y = point.get::<_, i32>(ctx, "y")?;
+    let point = ff::Point { x, y };
+    Ok(point)
+}
+
+fn pop_line_style<'gc>(
+    ctx: piccolo::Context<'gc>,
+    stack: &mut piccolo::Stack<'gc, '_>,
+) -> Result<ff::LineStyle, piccolo::Error<'gc>> {
+    let style = stack.from_back::<pc::Table>(ctx)?;
+    let color = style.get::<_, i64>(ctx, "color")?;
+    let Ok(color) = ff::Color::try_from(color as usize) else {
+        return format_error("invalid color");
+    };
+    let width = style.get::<_, i32>(ctx, "width")?;
+    let style = ff::LineStyle::new(color, width);
+    Ok(style)
+}
+
+fn pop_color<'gc>(
+    ctx: piccolo::Context<'gc>,
+    stack: &mut piccolo::Stack<'gc, '_>,
+) -> Result<ff::Color, piccolo::Error<'gc>> {
+    let color = stack.from_back::<i64>(ctx)?;
+    let Ok(color) = ff::Color::try_from(color as usize) else {
+        return format_error("invalid color");
+    };
+    Ok(color)
 }
 
 fn format_error<'gc, T>(err: &'static str) -> Result<T, pc::Error<'gc>> {
