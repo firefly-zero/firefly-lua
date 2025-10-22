@@ -103,6 +103,19 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         }),
     );
 
+    module.set_field(
+        ctx,
+        "draw_rounded_rect",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let style = pop_style(ctx, &mut stack)?;
+            let corner = pop_size(ctx, &mut stack)?;
+            let size = pop_size(ctx, &mut stack)?;
+            let point = pop_point(ctx, &mut stack)?;
+            ff::draw_rounded_rect(point, size, corner, style);
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
     ctx.set_global("firefly", module);
 }
 
