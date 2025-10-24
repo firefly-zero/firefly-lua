@@ -181,6 +181,26 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         }),
     );
 
+    module.set_field(
+        ctx,
+        "set_seed",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let seed = stack.from_back::<u32>(ctx)?;
+            ff::set_seed(seed);
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
+    module.set_field(
+        ctx,
+        "get_random",
+        pc::Callback::from_fn(&ctx, |_, _, mut stack| {
+            let res = ff::get_random();
+            stack.push_back(pc::Value::Integer(i64::from(res)));
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
     ctx.set_global("firefly", module);
 }
 

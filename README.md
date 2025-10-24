@@ -51,6 +51,13 @@ firefly.draw_arc(
     0, math.pi / 2, -- start and sweep angles
     style,
 )
+
+firefly.draw_sector(
+    point,
+    10, -- diameter
+    0, math.pi / 2, -- start and sweep angles
+    style,
+)
 ```
 
 Misc:
@@ -59,4 +66,8 @@ Misc:
 firefly.log_debug("let's go!")
 
 firefly.log_error("oh no...")
+
+firefly.set_seed(13)
+
+local rand_val = firefly.get_random()
 ```
