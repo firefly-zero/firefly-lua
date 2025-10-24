@@ -7,6 +7,22 @@ Lua SDK for making [Firefly Zero](https://fireflyzero.com/) games.
 
 ## Examples
 
+Callbacks:
+
+```lua
+function boot()
+    -- ...
+end
+
+function update()
+    -- ...
+end
+
+function render()
+    -- ...
+end
+```
+
 Graphics:
 
 ```lua
