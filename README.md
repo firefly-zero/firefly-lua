@@ -18,7 +18,7 @@ firefly.draw_point({x=10, y=20}, firefly.BLACK)
 
 firefly.draw_line(
     {x=10, y=20}, {x=30, y=40},
-    {color=firefly.RED, width=1}
+    {color=firefly.RED, width=1},
 )
 
 local style = {
@@ -37,6 +37,13 @@ firefly.draw_rounded_rect(point, size, corner, style)
 firefly.draw_circle(point, 10, style)
 
 firefly.draw_ellipse(point, size, style)
+
+firefly.draw_triangle(
+    {x=40, y=20},
+    {x=30, y=40},
+    {x=50, y=40},
+    style,
+)
 ```
 
 Misc:

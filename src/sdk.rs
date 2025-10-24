@@ -140,6 +140,19 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         }),
     );
 
+    module.set_field(
+        ctx,
+        "draw_triangle",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let style = pop_style(ctx, &mut stack)?;
+            let point_c = pop_point(ctx, &mut stack)?;
+            let point_b = pop_point(ctx, &mut stack)?;
+            let point_a = pop_point(ctx, &mut stack)?;
+            ff::draw_triangle(point_a, point_b, point_c, style);
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
     ctx.set_global("firefly", module);
 }
 
