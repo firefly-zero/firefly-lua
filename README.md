@@ -44,6 +44,13 @@ firefly.draw_triangle(
     {x=50, y=40},
     style,
 )
+
+firefly.draw_arc(
+    point,
+    10, -- diameter
+    0, math.pi / 2, -- start and sweep angles
+    style,
+)
 ```
 
 Misc:

@@ -153,6 +153,20 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         }),
     );
 
+    module.set_field(
+        ctx,
+        "draw_arc",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let style = pop_style(ctx, &mut stack)?;
+            let sweep = pop_angle(ctx, &mut stack)?;
+            let start = pop_angle(ctx, &mut stack)?;
+            let d = stack.from_back::<i32>(ctx)?;
+            let p = pop_point(ctx, &mut stack)?;
+            ff::draw_arc(p, d, start, sweep, style);
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
     ctx.set_global("firefly", module);
 }
 
@@ -238,6 +252,15 @@ fn pop_size<'gc>(
     let height = style.get::<_, i32>(ctx, "height")?;
     let style = ff::Size { width, height };
     Ok(style)
+}
+
+fn pop_angle<'gc>(
+    ctx: piccolo::Context<'gc>,
+    stack: &mut piccolo::Stack<'gc, '_>,
+) -> Result<ff::Angle, piccolo::Error<'gc>> {
+    let angle = stack.from_back::<f32>(ctx)?;
+    let angle = ff::Angle::from_radians(angle);
+    Ok(angle)
 }
 
 fn format_error<'gc, T>(err: &'static str) -> Result<T, pc::Error<'gc>> {
