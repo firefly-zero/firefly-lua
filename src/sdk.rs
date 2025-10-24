@@ -167,6 +167,20 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         }),
     );
 
+    module.set_field(
+        ctx,
+        "draw_sector",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let style = pop_style(ctx, &mut stack)?;
+            let sweep = pop_angle(ctx, &mut stack)?;
+            let start = pop_angle(ctx, &mut stack)?;
+            let d = stack.from_back::<i32>(ctx)?;
+            let p = pop_point(ctx, &mut stack)?;
+            ff::draw_sector(p, d, start, sweep, style);
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
     ctx.set_global("firefly", module);
 }
 
