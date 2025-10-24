@@ -70,4 +70,6 @@ firefly.log_error("oh no...")
 firefly.set_seed(13)
 
 local rand_val = firefly.get_random()
+
+firefly.quit()
 ```

@@ -201,6 +201,15 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         }),
     );
 
+    module.set_field(
+        ctx,
+        "quit",
+        pc::Callback::from_fn(&ctx, |_, _, _| {
+            ff::quit();
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
     ctx.set_global("firefly", module);
 }
 
