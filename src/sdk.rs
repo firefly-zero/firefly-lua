@@ -4,6 +4,10 @@ use piccolo as pc;
 pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
     let module = pc::Table::new(&ctx);
 
+    let mut peers = alloc::vec![ff::Peer::COMBINED];
+    peers.extend(ff::get_peers().iter());
+
+    // Colors.
     module.set_field(ctx, "NONE", 0);
     module.set_field(ctx, "BLACK", 1);
     module.set_field(ctx, "PURPLE", 2);
@@ -22,29 +26,10 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
     module.set_field(ctx, "GRAY", 15);
     module.set_field(ctx, "DARK_GRAY", 16);
 
-    module.set_field(
-        ctx,
-        "log_debug",
-        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
-            let text = stack.consume::<pc::String>(ctx)?;
-            let text = text.as_bytes();
-            let text = unsafe { alloc::str::from_utf8_unchecked(text) };
-            ff::log_debug(text);
-            Ok(pc::CallbackReturn::Return)
-        }),
-    );
+    // Other constants.
+    module.set_field(ctx, "COMBINED", 0);
 
-    module.set_field(
-        ctx,
-        "log_error",
-        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
-            let text = stack.consume::<pc::String>(ctx)?;
-            let text = text.as_bytes();
-            let text = unsafe { alloc::str::from_utf8_unchecked(text) };
-            ff::log_error(text);
-            Ok(pc::CallbackReturn::Return)
-        }),
-    );
+    // Graphics.
 
     module.set_field(
         ctx,
@@ -177,6 +162,55 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
             let d = stack.from_back::<i32>(ctx)?;
             let p = pop_point(ctx, &mut stack)?;
             ff::draw_sector(p, d, start, sweep, style);
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
+    // Input.
+
+    module.set_field(
+        ctx,
+        "read_pad",
+        pc::Callback::from_fn(&ctx, move |ctx, _, mut stack| {
+            let peer = stack.consume::<u8>(ctx)?;
+            let Some(peer) = peers.get(peer as usize) else {
+                return format_error("invalid peer");
+            };
+            let Some(pad) = ff::read_pad(*peer) else {
+                stack.push_back(pc::Value::Nil);
+                return Ok(pc::CallbackReturn::Return);
+            };
+
+            let res = pc::Table::new(&ctx);
+            res.set(ctx, "x", pad.x)?;
+            res.set(ctx, "y", pad.y)?;
+            stack.push_back(pc::Value::Table(res));
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
+    // Misc.
+
+    module.set_field(
+        ctx,
+        "log_debug",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let text = stack.consume::<pc::String>(ctx)?;
+            let text = text.as_bytes();
+            let text = unsafe { alloc::str::from_utf8_unchecked(text) };
+            ff::log_debug(text);
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
+    module.set_field(
+        ctx,
+        "log_error",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let text = stack.consume::<pc::String>(ctx)?;
+            let text = text.as_bytes();
+            let text = unsafe { alloc::str::from_utf8_unchecked(text) };
+            ff::log_error(text);
             Ok(pc::CallbackReturn::Return)
         }),
     );
