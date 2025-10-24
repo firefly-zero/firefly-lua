@@ -84,6 +84,18 @@ firefly.draw_sector(
 )
 ```
 
+Input:
+
+```lua
+local pad = firefly.read_pad(firefly.COMBINED)
+if pad then
+    {pad.x, pad.y}
+end
+
+local btns = firefly.read_buttons(firefly.COMBINED)
+{btns.s, btns.e, btns.w, btns.n}
+```
+
 Misc:
 
 ```lua

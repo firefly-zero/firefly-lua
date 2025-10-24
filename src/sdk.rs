@@ -6,6 +6,7 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
 
     let mut peers = alloc::vec![ff::Peer::COMBINED];
     peers.extend(ff::get_peers().iter());
+    let peers2 = peers.clone();
 
     // Colors.
     module.set_field(ctx, "NONE", 0);
@@ -184,6 +185,26 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
             let res = pc::Table::new(&ctx);
             res.set(ctx, "x", pad.x)?;
             res.set(ctx, "y", pad.y)?;
+            stack.push_back(pc::Value::Table(res));
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
+    module.set_field(
+        ctx,
+        "read_buttons",
+        pc::Callback::from_fn(&ctx, move |ctx, _, mut stack| {
+            let peer = stack.consume::<u8>(ctx)?;
+            let Some(peer) = peers2.get(peer as usize) else {
+                return format_error("invalid peer");
+            };
+            let btns = ff::read_buttons(*peer);
+
+            let res = pc::Table::new(&ctx);
+            res.set(ctx, "s", btns.s)?;
+            res.set(ctx, "e", btns.e)?;
+            res.set(ctx, "w", btns.w)?;
+            res.set(ctx, "n", btns.n)?;
             stack.push_back(pc::Value::Table(res));
             Ok(pc::CallbackReturn::Return)
         }),
