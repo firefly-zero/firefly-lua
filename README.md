@@ -1,9 +1,17 @@
 # firefly-lua
 
-Lua SDK for making [Firefly Zero](https://fireflyzero.com/) games.
+Lua SDK for making [Firefly Zero](https://fireflyzero.com/) games. Based on a wasm-compatible fork of [piccolo](https://github.com/kyren/piccolo).
 
 * [▶️ getting started](https://docs.fireflyzero.com/dev/getting-started/)
 * [🐙 github](https://github.com/firefly-zero/firefly-lua)
+
+## SDK state
+
+TL;DR: Performance is not good yet and only graphics API is implemented.
+
+A Lua app is about 50 times slower than an equivalent [Go](https://github.com/firefly-zero/firefly-go) app. So, until we find a more performant solution, we recommend to use Lua only for simple demos or as an intermediate step when migrating a game from another platform. The latter is a good way to do a gradual migration: first rewrite runtime calls (like calls to draw a shape on the screen) and then change the syntax and code structure to Go.
+
+At the moment, the SDK implements only shape drawing functions and a few helper functions (randomness and logging). This should be sufficient for non-interactive demos, similar to [Fill Patterns](https://catalog.fireflyzero.com/peter.fp8x8).
 
 ## Examples
 
