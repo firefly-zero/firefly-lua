@@ -84,16 +84,26 @@ firefly.draw_sector(
 )
 ```
 
+Multiplayer:
+
+```lua
+local peer = firefly.get_me()
+```
+
 Input:
 
 ```lua
-local pad = firefly.read_pad(firefly.COMBINED)
+local pad = firefly.read_pad(peer)
 if pad then
     {pad.x, pad.y}
 end
 
-local btns = firefly.read_buttons(firefly.COMBINED)
+local btns = firefly.read_buttons(peer)
 {btns.s, btns.e, btns.w, btns.n}
+
+-- Read combined inputs.
+pad = firefly.read_pad(firefly.COMBINED)
+btns = firefly.read_buttons(firefly.COMBINED)
 ```
 
 Misc:

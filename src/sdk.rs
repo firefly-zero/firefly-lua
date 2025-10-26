@@ -202,6 +202,19 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         }),
     );
 
+    // Net.
+
+    module.set_field(
+        ctx,
+        "get_me",
+        pc::Callback::from_fn(&ctx, move |_, _, mut stack| {
+            let peer = ff::get_me();
+            let peer = unsafe { peer.into_u8() };
+            stack.push_back(pc::Value::Integer(i64::from(peer)));
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
     // Misc.
 
     module.set_field(
