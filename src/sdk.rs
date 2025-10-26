@@ -43,7 +43,6 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         "set_color",
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
             let rgb = pop_rgb(ctx, &mut stack)?;
-
             let color = pop_color(ctx, &mut stack)?;
             ff::set_color(color, rgb);
             Ok(pc::CallbackReturn::Return)
@@ -159,6 +158,20 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
             let d = stack.from_back::<i32>(ctx)?;
             let p = pop_point(ctx, &mut stack)?;
             ff::draw_sector(p, d, start, sweep, style);
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
+    module.set_field(
+        ctx,
+        "draw_text",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let color = pop_color(ctx, &mut stack)?;
+            let point = pop_point(ctx, &mut stack)?;
+            let font = pop_file(ctx, &mut stack)?;
+            let font = font.as_font();
+            let text = pop_str(ctx, &mut stack)?;
+            ff::draw_text(text, &font, point, color);
             Ok(pc::CallbackReturn::Return)
         }),
     );
@@ -427,6 +440,16 @@ fn pop_str<'gc>(
         return format_error("the string is not valid UTF-8");
     };
     Ok(name)
+}
+
+fn pop_file<'gc>(
+    ctx: piccolo::Context<'gc>,
+    stack: &mut piccolo::Stack<'gc, '_>,
+) -> Result<ff::File<'gc>, piccolo::Error<'gc>> {
+    let file = stack.consume::<pc::String>(ctx)?;
+    let file = file.as_bytes();
+    let file = unsafe { ff::File::from_bytes(file) };
+    Ok(file)
 }
 
 fn format_error<'gc, T>(err: &'static str) -> Result<T, pc::Error<'gc>> {

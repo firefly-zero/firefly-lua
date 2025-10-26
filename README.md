@@ -82,6 +82,9 @@ firefly.draw_sector(
     0, math.pi / 2, -- start and sweep angles
     style,
 )
+
+local font = firefly.load_file("font")
+firefly.draw_text("oh hi mark", font, point, firefly.BLACK)
 ```
 
 Multiplayer:
