@@ -257,14 +257,28 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         ctx,
         "dump_file",
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let buf = stack.consume::<pc::String>(ctx)?;
+            let buf = buf.as_bytes();
             let name = stack.consume::<pc::String>(ctx)?;
             let name = name.as_bytes();
             let Ok(name) = alloc::str::from_utf8(name) else {
                 return format_error("file name is not valid UTF-8");
             };
-            let buf = stack.consume::<pc::String>(ctx)?;
-            let buf = buf.as_bytes();
             ff::dump_file(name, buf);
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
+    module.set_field(
+        ctx,
+        "remove_file",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let name = stack.consume::<pc::String>(ctx)?;
+            let name = name.as_bytes();
+            let Ok(name) = alloc::str::from_utf8(name) else {
+                return format_error("file name is not valid UTF-8");
+            };
+            ff::remove_file(name);
             Ok(pc::CallbackReturn::Return)
         }),
     );

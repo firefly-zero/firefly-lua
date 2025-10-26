@@ -117,6 +117,8 @@ Filesystem:
 local file = firefly.load_file("font")
 
 firefly.dump_file("font", file)
+
+firefly.remove_file("font")
 ```
 
 Misc:
