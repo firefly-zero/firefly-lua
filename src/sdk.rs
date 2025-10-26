@@ -238,7 +238,9 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
             let name = stack.consume::<pc::String>(ctx)?;
             let name = name.as_bytes();
-            let name = unsafe { alloc::str::from_utf8_unchecked(name) };
+            let Ok(name) = alloc::str::from_utf8(name) else {
+                return format_error("file name is not valid UTF-8");
+            };
             let Some(file) = ff::load_file_buf(name) else {
                 return format_error("file not found");
             };
@@ -251,6 +253,22 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         }),
     );
 
+    module.set_field(
+        ctx,
+        "dump_file",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let name = stack.consume::<pc::String>(ctx)?;
+            let name = name.as_bytes();
+            let Ok(name) = alloc::str::from_utf8(name) else {
+                return format_error("file name is not valid UTF-8");
+            };
+            let buf = stack.consume::<pc::String>(ctx)?;
+            let buf = buf.as_bytes();
+            ff::dump_file(name, buf);
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
     // Misc.
 
     module.set_field(
@@ -259,7 +277,9 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
             let text = stack.consume::<pc::String>(ctx)?;
             let text = text.as_bytes();
-            let text = unsafe { alloc::str::from_utf8_unchecked(text) };
+            let Ok(text) = alloc::str::from_utf8(text) else {
+                return format_error("text is not valid UTF-8");
+            };
             ff::log_debug(text);
             Ok(pc::CallbackReturn::Return)
         }),
@@ -271,7 +291,9 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
             let text = stack.consume::<pc::String>(ctx)?;
             let text = text.as_bytes();
-            let text = unsafe { alloc::str::from_utf8_unchecked(text) };
+            let Ok(text) = alloc::str::from_utf8(text) else {
+                return format_error("text is not valid UTF-8");
+            };
             ff::log_error(text);
             Ok(pc::CallbackReturn::Return)
         }),

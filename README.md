@@ -115,6 +115,8 @@ Filesystem:
 
 ```lua
 local file = firefly.load_file("font")
+
+firefly.dump_file("font", file)
 ```
 
 Misc:
