@@ -88,6 +88,11 @@ Multiplayer:
 
 ```lua
 local peer = firefly.get_me()
+
+local peers = firefly.get_peers()
+for i = 1, #peers do
+    peer = peers[i]
+end
 ```
 
 Input:

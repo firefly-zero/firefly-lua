@@ -168,7 +168,7 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
     module.set_field(
         ctx,
         "read_pad",
-        pc::Callback::from_fn(&ctx, move |ctx, _, mut stack| {
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
             let peer = stack.consume::<u8>(ctx)?;
             let peer = unsafe { ff::Peer::from_u8(peer) };
             let Some(pad) = ff::read_pad(peer) else {
@@ -187,7 +187,7 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
     module.set_field(
         ctx,
         "read_buttons",
-        pc::Callback::from_fn(&ctx, move |ctx, _, mut stack| {
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
             let peer = stack.consume::<u8>(ctx)?;
             let peer = unsafe { ff::Peer::from_u8(peer) };
             let btns = ff::read_buttons(peer);
@@ -207,10 +207,25 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
     module.set_field(
         ctx,
         "get_me",
-        pc::Callback::from_fn(&ctx, move |_, _, mut stack| {
+        pc::Callback::from_fn(&ctx, |_, _, mut stack| {
             let peer = ff::get_me();
             let peer = unsafe { peer.into_u8() };
             stack.push_back(pc::Value::Integer(i64::from(peer)));
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
+    module.set_field(
+        ctx,
+        "get_peers",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let peers = ff::get_peers();
+            let res = pc::Table::new(&ctx);
+            for (peer, idx) in peers.into_iter().zip(1..) {
+                let peer = unsafe { peer.into_u8() };
+                res.set(ctx, idx, peer)?;
+            }
+            stack.push_back(pc::Value::Table(res));
             Ok(pc::CallbackReturn::Return)
         }),
     );
