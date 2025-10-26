@@ -4,10 +4,6 @@ use piccolo as pc;
 pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
     let module = pc::Table::new(&ctx);
 
-    let mut peers = alloc::vec![ff::Peer::COMBINED];
-    peers.extend(ff::get_peers().iter());
-    let peers2 = peers.clone();
-
     // Colors.
     module.set_field(ctx, "NONE", 0);
     module.set_field(ctx, "BLACK", 1);
@@ -174,10 +170,8 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         "read_pad",
         pc::Callback::from_fn(&ctx, move |ctx, _, mut stack| {
             let peer = stack.consume::<u8>(ctx)?;
-            let Some(peer) = peers.get(peer as usize) else {
-                return format_error("invalid peer");
-            };
-            let Some(pad) = ff::read_pad(*peer) else {
+            let peer = unsafe { ff::Peer::from_u8(peer) };
+            let Some(pad) = ff::read_pad(peer) else {
                 stack.push_back(pc::Value::Nil);
                 return Ok(pc::CallbackReturn::Return);
             };
@@ -195,10 +189,8 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         "read_buttons",
         pc::Callback::from_fn(&ctx, move |ctx, _, mut stack| {
             let peer = stack.consume::<u8>(ctx)?;
-            let Some(peer) = peers2.get(peer as usize) else {
-                return format_error("invalid peer");
-            };
-            let btns = ff::read_buttons(*peer);
+            let peer = unsafe { ff::Peer::from_u8(peer) };
+            let btns = ff::read_buttons(peer);
 
             let res = pc::Table::new(&ctx);
             res.set(ctx, "s", btns.s)?;

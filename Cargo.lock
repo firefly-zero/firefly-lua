@@ -44,8 +44,6 @@ dependencies = [
 [[package]]
 name = "firefly-rust"
 version = "0.9.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cf9e46395e7e1db94b01115ce2497dd930d5795534857e420158321bbae3b07c"
 dependencies = [
  "talc",
 ]
