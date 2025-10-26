@@ -85,6 +85,11 @@ firefly.draw_sector(
 
 local font = firefly.load_file("font")
 firefly.draw_text("oh hi mark", font, point, firefly.BLACK)
+
+firefly.draw_qr(
+    "https://fireflyzero.com/",
+    point, firefly.BLACK, firefly.WHITE,
+)
 ```
 
 Multiplayer:
