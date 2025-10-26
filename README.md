@@ -111,6 +111,12 @@ pad = firefly.read_pad(firefly.COMBINED)
 btns = firefly.read_buttons(firefly.COMBINED)
 ```
 
+Filesystem:
+
+```lua
+local file = firefly.load_file("font")
+```
+
 Misc:
 
 ```lua

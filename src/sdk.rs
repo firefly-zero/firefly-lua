@@ -230,6 +230,27 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         }),
     );
 
+    // FS.
+
+    module.set_field(
+        ctx,
+        "load_file",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let name = stack.consume::<pc::String>(ctx)?;
+            let name = name.as_bytes();
+            let name = unsafe { alloc::str::from_utf8_unchecked(name) };
+            let Some(file) = ff::load_file_buf(name) else {
+                return format_error("file not found");
+            };
+
+            let file = file.into_vec();
+            let file = file.into_boxed_slice();
+            let res = pc::String::from_buffer(&ctx, file);
+            stack.push_back(pc::Value::String(res));
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
     // Misc.
 
     module.set_field(
