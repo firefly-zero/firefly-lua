@@ -236,15 +236,10 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         ctx,
         "load_file",
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
-            let name = stack.consume::<pc::String>(ctx)?;
-            let name = name.as_bytes();
-            let Ok(name) = alloc::str::from_utf8(name) else {
-                return format_error("file name is not valid UTF-8");
-            };
+            let name = pop_str(ctx, &mut stack)?;
             let Some(file) = ff::load_file_buf(name) else {
                 return format_error("file not found");
             };
-
             let file = file.into_vec();
             let file = file.into_boxed_slice();
             let res = pc::String::from_buffer(&ctx, file);
@@ -259,11 +254,7 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
             let buf = stack.consume::<pc::String>(ctx)?;
             let buf = buf.as_bytes();
-            let name = stack.consume::<pc::String>(ctx)?;
-            let name = name.as_bytes();
-            let Ok(name) = alloc::str::from_utf8(name) else {
-                return format_error("file name is not valid UTF-8");
-            };
+            let name = pop_str(ctx, &mut stack)?;
             ff::dump_file(name, buf);
             Ok(pc::CallbackReturn::Return)
         }),
@@ -273,11 +264,7 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         ctx,
         "remove_file",
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
-            let name = stack.consume::<pc::String>(ctx)?;
-            let name = name.as_bytes();
-            let Ok(name) = alloc::str::from_utf8(name) else {
-                return format_error("file name is not valid UTF-8");
-            };
+            let name = pop_str(ctx, &mut stack)?;
             ff::remove_file(name);
             Ok(pc::CallbackReturn::Return)
         }),
@@ -289,11 +276,7 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         ctx,
         "log_debug",
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
-            let text = stack.consume::<pc::String>(ctx)?;
-            let text = text.as_bytes();
-            let Ok(text) = alloc::str::from_utf8(text) else {
-                return format_error("text is not valid UTF-8");
-            };
+            let text = pop_str(ctx, &mut stack)?;
             ff::log_debug(text);
             Ok(pc::CallbackReturn::Return)
         }),
@@ -303,11 +286,7 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         ctx,
         "log_error",
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
-            let text = stack.consume::<pc::String>(ctx)?;
-            let text = text.as_bytes();
-            let Ok(text) = alloc::str::from_utf8(text) else {
-                return format_error("text is not valid UTF-8");
-            };
+            let text = pop_str(ctx, &mut stack)?;
             ff::log_error(text);
             Ok(pc::CallbackReturn::Return)
         }),
@@ -436,6 +415,18 @@ fn pop_angle<'gc>(
     let angle = stack.from_back::<f32>(ctx)?;
     let angle = ff::Angle::from_radians(angle);
     Ok(angle)
+}
+
+fn pop_str<'gc>(
+    ctx: piccolo::Context<'gc>,
+    stack: &mut piccolo::Stack<'gc, '_>,
+) -> Result<&'gc str, piccolo::Error<'gc>> {
+    let name = stack.consume::<pc::String>(ctx)?;
+    let name = name.as_bytes();
+    let Ok(name) = alloc::str::from_utf8(name) else {
+        return format_error("the string is not valid UTF-8");
+    };
+    Ok(name)
 }
 
 fn format_error<'gc, T>(err: &'static str) -> Result<T, pc::Error<'gc>> {
