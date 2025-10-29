@@ -296,6 +296,38 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         }),
     );
 
+    // Menu.
+
+    module.set_field(
+        ctx,
+        "add_menu_item",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let text = pop_str(ctx, &mut stack)?;
+            let i = stack.consume::<u8>(ctx)?;
+            ff::add_menu_item(i, text);
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
+    module.set_field(
+        ctx,
+        "remove_menu_item",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let i = stack.consume::<u8>(ctx)?;
+            ff::remove_menu_item(i);
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
+    module.set_field(
+        ctx,
+        "open_menu",
+        pc::Callback::from_fn(&ctx, |_ctx, _, mut _stack| {
+            ff::open_menu();
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
     // Misc.
 
     module.set_field(

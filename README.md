@@ -129,6 +129,14 @@ firefly.dump_file("font", file)
 firefly.remove_file("font")
 ```
 
+Menu:
+
+```lua
+firefly.add_menu_item(1, "intentory")
+firefly.remove_menu_item(1)
+firefly.open_menu()
+```
+
 Misc:
 
 ```lua
