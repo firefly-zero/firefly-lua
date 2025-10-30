@@ -1,0 +1,35 @@
+# https://taskfile.dev
+version: "3"
+
+tasks:
+  build:
+    cmds:
+      - firefly_cli build
+      - cp $(firefly_cli vfs)/roms/demo/lua-triangle/_bin main.wasm
+
+  release:
+    desc: build and publish release
+    cmds:
+      - task: build
+      - test {{.CLI_ARGS}}
+      - grep -F '"{{.CLI_ARGS}}"' Cargo.toml
+      - git tag {{.CLI_ARGS}}
+      - git push
+      - git push --tags
+      - gh release create --generate-notes {{.CLI_ARGS}}
+      - gh release upload {{.CLI_ARGS}} main.wasm
+
+  format:
+    desc: "run code formatters"
+    cmds:
+      - cargo fmt
+  lint:
+    desc: "run linters"
+    cmds:
+      - cargo clippy --target wasm32-unknown-unknown
+  all:
+    cmds:
+      - task: format
+      - task: lint
+  default:
+    - task: all
