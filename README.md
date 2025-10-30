@@ -137,6 +137,18 @@ firefly.remove_menu_item(1)
 firefly.open_menu()
 ```
 
+Boards (scoreboards) and badges (achievements):
+
+```lua
+local badge1 = 1
+local badge2 = 2
+
+local progress = firefly.get_progress(peer, badge1)
+{progress.done, progress.goal}
+
+progress = firefly.add_progress(peer, badge1, 1)
+```
+
 Misc:
 
 ```lua

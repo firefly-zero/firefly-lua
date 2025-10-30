@@ -195,8 +195,7 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         ctx,
         "read_pad",
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
-            let peer = stack.consume::<u8>(ctx)?;
-            let peer = unsafe { ff::Peer::from_u8(peer) };
+            let peer = pop_peer(ctx, &mut stack)?;
             let Some(pad) = ff::read_pad(peer) else {
                 stack.push_back(pc::Value::Nil);
                 return Ok(pc::CallbackReturn::Return);
@@ -214,8 +213,7 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         ctx,
         "read_buttons",
         pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
-            let peer = stack.consume::<u8>(ctx)?;
-            let peer = unsafe { ff::Peer::from_u8(peer) };
+            let peer = pop_peer(ctx, &mut stack)?;
             let btns = ff::read_buttons(peer);
 
             let res = pc::Table::new(&ctx);
@@ -324,6 +322,41 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         "open_menu",
         pc::Callback::from_fn(&ctx, |_ctx, _, mut _stack| {
             ff::open_menu();
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
+    // Stats.
+
+    module.set_field(
+        ctx,
+        "get_progress",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let badge = pop_badge(ctx, &mut stack)?;
+            let peer = pop_peer(ctx, &mut stack)?;
+            let progress = ff::get_progress(peer, badge);
+
+            let res = pc::Table::new(&ctx);
+            res.set(ctx, "done", progress.done)?;
+            res.set(ctx, "goal", progress.goal)?;
+            stack.push_back(pc::Value::Table(res));
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
+    module.set_field(
+        ctx,
+        "add_progress",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let val = stack.consume::<i16>(ctx)?;
+            let badge = pop_badge(ctx, &mut stack)?;
+            let peer = pop_peer(ctx, &mut stack)?;
+            let progress = ff::add_progress(peer, badge, val);
+
+            let res = pc::Table::new(&ctx);
+            res.set(ctx, "done", progress.done)?;
+            res.set(ctx, "goal", progress.goal)?;
+            stack.push_back(pc::Value::Table(res));
             Ok(pc::CallbackReturn::Return)
         }),
     );
@@ -495,6 +528,23 @@ fn pop_file<'gc>(
     let file = file.as_bytes();
     let file = unsafe { ff::File::from_bytes(file) };
     Ok(file)
+}
+
+fn pop_badge<'gc>(
+    ctx: piccolo::Context<'gc>,
+    stack: &mut piccolo::Stack<'gc, '_>,
+) -> Result<ff::Badge, piccolo::Error<'gc>> {
+    let badge = stack.consume::<u8>(ctx)?;
+    Ok(ff::Badge(badge))
+}
+
+fn pop_peer<'gc>(
+    ctx: piccolo::Context<'gc>,
+    stack: &mut piccolo::Stack<'gc, '_>,
+) -> Result<ff::Peer, piccolo::Error<'gc>> {
+    let peer = stack.consume::<u8>(ctx)?;
+    let peer = unsafe { ff::Peer::from_u8(peer) };
+    Ok(peer)
 }
 
 fn format_error<'gc, T>(err: &'static str) -> Result<T, pc::Error<'gc>> {
