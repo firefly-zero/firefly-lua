@@ -60,6 +60,7 @@ fn run_boot() -> Result<(), anyhow::Error> {
 #[unsafe(no_mangle)]
 extern "C" fn update() {
     if let Err(err) = run_update() {
+        // TODO: add circuit breaker, exit the app if it keeps failing
         let err = alloc::format!("{err}");
         ff::log_error(&err);
     }
@@ -93,6 +94,28 @@ fn run_render() -> Result<(), Box<dyn core::error::Error>> {
         let env = ctx.globals();
         let render = env.get::<_, Closure>(ctx, "render")?;
         let ex = Executor::start(ctx, render.into(), ());
+        Ok(ctx.stash(ex))
+    });
+    if let Ok(ex) = maybe_ex {
+        lua.execute::<()>(&ex)?;
+    }
+    Ok(())
+}
+
+#[unsafe(no_mangle)]
+extern "C" fn before_exit() {
+    if let Err(err) = run_before_exit() {
+        let err = alloc::format!("{err}");
+        ff::log_error(&err);
+    }
+}
+
+fn run_before_exit() -> Result<(), Box<dyn core::error::Error>> {
+    let lua = get_lua();
+    let maybe_ex = lua.try_enter(|ctx| {
+        let env = ctx.globals();
+        let before_exit = env.get::<_, Closure>(ctx, "before_exit")?;
+        let ex = Executor::start(ctx, before_exit.into(), ());
         Ok(ctx.stash(ex))
     });
     if let Ok(ex) = maybe_ex {

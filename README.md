@@ -7,11 +7,9 @@ Lua SDK for making [Firefly Zero](https://fireflyzero.com/) games. Based on a wa
 
 ## SDK state
 
-TL;DR: Performance is not good yet and only graphics API is implemented.
-
 A Lua app is about 50 times slower than an equivalent [Go](https://github.com/firefly-zero/firefly-go) app. So, until we find a more performant solution, we recommend to use Lua only for simple demos or as an intermediate step when migrating a game from another platform. The latter is a good way to do a gradual migration: first rewrite runtime calls (like calls to draw a shape on the screen) and then change the syntax and code structure to Go.
 
-At the moment, the SDK implements only shape drawing functions and a few helper functions (randomness and logging). This should be sufficient for non-interactive demos, similar to [Fill Patterns](https://catalog.fireflyzero.com/peter.fp8x8).
+At the moment, the SDK doesn't implement audio API.
 
 ## Examples
 
@@ -27,6 +25,10 @@ function update()
 end
 
 function render()
+    -- ...
+end
+
+function before_exit()
     -- ...
 end
 ```
