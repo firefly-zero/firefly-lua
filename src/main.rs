@@ -123,3 +123,23 @@ fn run_before_exit() -> Result<(), Box<dyn core::error::Error>> {
     }
     Ok(())
 }
+
+#[unsafe(no_mangle)]
+extern "C" fn handle_menu(idx: i32) {
+    if let Err(err) = run_handle_menu(idx) {
+        let err = alloc::format!("{err}");
+        ff::log_error(&err);
+    }
+}
+
+fn run_handle_menu(idx: i32) -> Result<(), Box<dyn core::error::Error>> {
+    let lua = get_lua();
+    let ex = lua.try_enter(|ctx| {
+        let env = ctx.globals();
+        let handle_menu = env.get::<_, Closure>(ctx, "handle_menu")?;
+        let ex = Executor::start(ctx, handle_menu.into(), (idx,));
+        Ok(ctx.stash(ex))
+    })?;
+    lua.execute::<()>(&ex)?;
+    Ok(())
+}

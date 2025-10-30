@@ -31,6 +31,10 @@ end
 function before_exit()
     -- ...
 end
+
+function handle_menu(index)
+    -- ...
+end
 ```
 
 Graphics:
