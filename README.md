@@ -147,6 +147,12 @@ local progress = firefly.get_progress(peer, badge1)
 {progress.done, progress.goal}
 
 progress = firefly.add_progress(peer, badge1, 1)
+
+local board1 = 1
+local board2 = 2
+
+local best_score = firefly.get_score(peer, board1)
+best_score = firefly.add_score(peer, board1, 10)
 ```
 
 Misc:

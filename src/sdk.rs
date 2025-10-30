@@ -361,6 +361,31 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
         }),
     );
 
+    module.set_field(
+        ctx,
+        "get_score",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let board = pop_board(ctx, &mut stack)?;
+            let peer = pop_peer(ctx, &mut stack)?;
+            let score = ff::get_score(peer, board);
+            stack.push_back(pc::Value::Integer(i64::from(score)));
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
+    module.set_field(
+        ctx,
+        "add_score",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let val = stack.consume::<i16>(ctx)?;
+            let board = pop_board(ctx, &mut stack)?;
+            let peer = pop_peer(ctx, &mut stack)?;
+            let score = ff::add_score(peer, board, val);
+            stack.push_back(pc::Value::Integer(i64::from(score)));
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
     // Misc.
 
     module.set_field(
@@ -536,6 +561,14 @@ fn pop_badge<'gc>(
 ) -> Result<ff::Badge, piccolo::Error<'gc>> {
     let badge = stack.consume::<u8>(ctx)?;
     Ok(ff::Badge(badge))
+}
+
+fn pop_board<'gc>(
+    ctx: piccolo::Context<'gc>,
+    stack: &mut piccolo::Stack<'gc, '_>,
+) -> Result<ff::Board, piccolo::Error<'gc>> {
+    let board = stack.consume::<u8>(ctx)?;
+    Ok(ff::Board(board))
 }
 
 fn pop_peer<'gc>(
