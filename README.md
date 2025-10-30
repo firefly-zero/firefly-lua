@@ -35,6 +35,11 @@ end
 function handle_menu(index)
     -- ...
 end
+
+function cheat(cmd, val)
+    -- ...
+    return 0
+end
 ```
 
 Graphics:

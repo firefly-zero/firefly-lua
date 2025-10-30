@@ -143,3 +143,27 @@ fn run_handle_menu(idx: i32) -> Result<(), Box<dyn core::error::Error>> {
     lua.execute::<()>(&ex)?;
     Ok(())
 }
+
+#[unsafe(no_mangle)]
+extern "C" fn cheat(cmd: i32, val: i32) -> i32 {
+    match run_cheat(cmd, val) {
+        Ok(val) => val,
+        Err(err) => {
+            let err = alloc::format!("{err}");
+            ff::log_error(&err);
+            0
+        }
+    }
+}
+
+fn run_cheat(cmd: i32, val: i32) -> Result<i32, Box<dyn core::error::Error>> {
+    let lua = get_lua();
+    let ex = lua.try_enter(|ctx| {
+        let env = ctx.globals();
+        let cheat = env.get::<_, Closure>(ctx, "cheat")?;
+        let ex = Executor::start(ctx, cheat.into(), (cmd, val));
+        Ok(ctx.stash(ex))
+    })?;
+    let (res,) = lua.execute::<(i32,)>(&ex)?;
+    Ok(res)
+}
