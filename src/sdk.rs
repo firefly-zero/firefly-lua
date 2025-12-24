@@ -468,9 +468,7 @@ fn pop_color<'gc>(
     stack: &mut piccolo::Stack<'gc, '_>,
 ) -> Result<ff::Color, piccolo::Error<'gc>> {
     let color = stack.from_back::<i64>(ctx)?;
-    let Ok(color) = ff::Color::try_from(color as usize) else {
-        return format_error("invalid color");
-    };
+    let color = ff::Color::from(color as u8);
     Ok(color)
 }
 
@@ -480,9 +478,7 @@ fn pop_line_style<'gc>(
 ) -> Result<ff::LineStyle, piccolo::Error<'gc>> {
     let style = stack.from_back::<pc::Table>(ctx)?;
     let color = style.get::<_, i64>(ctx, "color")?;
-    let Ok(color) = ff::Color::try_from(color as usize) else {
-        return format_error("invalid color");
-    };
+    let color = ff::Color::from(color as u8);
     let width = style.get::<_, i32>(ctx, "width")?;
     let style = ff::LineStyle::new(color, width);
     Ok(style)
@@ -495,14 +491,10 @@ fn pop_style<'gc>(
     let style = stack.from_back::<pc::Table>(ctx)?;
 
     let fill_color = style.get::<_, i64>(ctx, "fill_color")?;
-    let Ok(fill_color) = ff::Color::try_from(fill_color as usize) else {
-        return format_error("invalid fill_color");
-    };
+    let fill_color = ff::Color::from(fill_color as u8);
 
     let stroke_color = style.get::<_, i64>(ctx, "stroke_color")?;
-    let Ok(stroke_color) = ff::Color::try_from(stroke_color as usize) else {
-        return format_error("invalid stroke_color");
-    };
+    let stroke_color = ff::Color::from(stroke_color as u8);
 
     let stroke_width = style.get::<_, i32>(ctx, "stroke_width")?;
     let style = ff::Style {

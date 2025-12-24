@@ -5,8 +5,7 @@ edition = "2024"
 
 [dependencies]
 piccolo = { path = "/home/gram/gh/piccolo", default-features = false }
-firefly-rust = { path = "/home/gram/ff/firefly-rust", features = ["talc"] }
-# firefly-rust = { version = "0.9.3", features = ["talc"] }
+firefly-rust = { version = "0.10.0", features = ["talc"] }
 anyhow = { version = "1.0.100", default-features = false }
 
 # https://github.com/johnthagen/min-sized-rust
