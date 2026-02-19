@@ -177,5 +177,12 @@ firefly.set_seed(13)
 
 local rand_val = firefly.get_random()
 
+local name = firefly.get_name(peer)
+
+local settings = firefly.get_settings(peer)
+if settings.language == "en" then
+    -- ...
+end
+
 firefly.quit()
 ```

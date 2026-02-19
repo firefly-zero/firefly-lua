@@ -5,11 +5,14 @@ edition = "2024"
 
 [dependencies]
 piccolo = { path = "/home/gram/gh/piccolo", default-features = false }
-firefly-rust = { version = "0.10.0", features = ["talc"] }
-anyhow = { version = "1.0.100", default-features = false }
+firefly-rust = { version = "0.11.0", features = ["talc"] }
+anyhow = { version = "1.0.101", default-features = false }
 
 # https://github.com/johnthagen/min-sized-rust
 [profile.release]
 strip = true    # Automatically strip symbols from the binary.
 opt-level = "z" # Optimize for size.
 lto = true      # Enable link-time optimization
+
+[patch.crates-io]
+firefly-rust = { path = "../firefly-rust" }

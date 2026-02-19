@@ -430,6 +430,51 @@ pub fn load_sdk<'gc>(ctx: pc::Context<'gc>) {
 
     module.set_field(
         ctx,
+        "get_name",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let mut buf = [0u8; 16];
+            let peer = pop_peer(ctx, &mut stack)?;
+            _ = ff::get_name(peer, &mut buf);
+
+            let res = alloc::boxed::Box::new(buf);
+            let res = pc::String::from_buffer(&ctx, res);
+            stack.push_back(pc::Value::String(res));
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
+    module.set_field(
+        ctx,
+        "get_settings",
+        pc::Callback::from_fn(&ctx, |ctx, _, mut stack| {
+            let peer = pop_peer(ctx, &mut stack)?;
+            let s = ff::get_settings(peer);
+
+            let theme = pc::Table::new(&ctx);
+            theme.set(ctx, "id", s.theme.id)?;
+            theme.set(ctx, "primary", i32::from(s.theme.primary))?;
+            theme.set(ctx, "secondary", i32::from(s.theme.secondary))?;
+            theme.set(ctx, "accent", i32::from(s.theme.accent))?;
+            theme.set(ctx, "bg", i32::from(s.theme.bg))?;
+
+            let lang = alloc::boxed::Box::new(s.language.code_array());
+            let lang = pc::String::from_buffer(&ctx, lang);
+
+            let res = pc::Table::new(&ctx);
+            res.set(ctx, "theme", theme)?;
+            res.set(ctx, "language", lang)?;
+            res.set(ctx, "rotate_screen", s.rotate_screen)?;
+            res.set(ctx, "reduce_flashing", s.reduce_flashing)?;
+            res.set(ctx, "contrast", s.contrast)?;
+            res.set(ctx, "easter_eggs", s.easter_eggs)?;
+            stack.push_back(pc::Value::Table(res));
+
+            Ok(pc::CallbackReturn::Return)
+        }),
+    );
+
+    module.set_field(
+        ctx,
         "quit",
         pc::Callback::from_fn(&ctx, |_, _, _| {
             ff::quit();
