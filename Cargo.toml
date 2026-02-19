@@ -1,11 +1,11 @@
 [package]
 name = "firefly-lua"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 
 [dependencies]
 piccolo = { path = "/home/gram/gh/piccolo", default-features = false }
-firefly-rust = { version = "0.11.0", features = ["talc"] }
+firefly-rust = { version = "0.12.0", features = ["talc"] }
 anyhow = { version = "1.0.101", default-features = false }
 
 # https://github.com/johnthagen/min-sized-rust
@@ -13,6 +13,3 @@ anyhow = { version = "1.0.101", default-features = false }
 strip = true    # Automatically strip symbols from the binary.
 opt-level = "z" # Optimize for size.
 lto = true      # Enable link-time optimization
-
-[patch.crates-io]
-firefly-rust = { path = "../firefly-rust" }
